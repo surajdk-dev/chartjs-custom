@@ -1,0 +1,298 @@
+<!-- no html is in the current samples, just json objects -->
+<html>
+  <head>
+    <title>
+      Chart.JS - Bar/Line Chart - Full Example w Buttons from "actions" array in samples
+    </title>
+  </head>
+  <style>
+    /***
+ * codepen user notes: 
+ * Try "change view" -> "/full/" or ...
+ *   change canvas height attr to "350" in "/pen/"
+ * Any code edits will refresh & clear random data
+***/
+
+/* scraped from the Chart.js examples website */
+button {
+    transition: background .25s, border-color .25s;
+    background: rgba(40,44,52,.05);
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: #2f5fd0;
+    text-decoration: none !important;
+    display: inline-block;
+    font-size: .8rem;
+    padding: 8px 16px;
+    margin: 0 8px 8px 0;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}
+/* added for dark mode */
+body, body a {
+  font-family: Helvetica, Arial, sans-serif;
+}
+body.dark, body.dark a {
+  background: #02050a;
+  color: #c0d0e0;
+}
+body.dark button {
+  background: rgba(40,44,52,.75);
+  color: #3f7fd0;
+}
+button:hover {
+  background: rgba(40,44,52,.5);
+}
+body.dark button:hover {
+  background: #c0d0e0;
+  color: rgba(40,44,52,1);
+}
+.mainclass {
+    height: 50%;
+    width: 60%;
+}
+  </style>
+  <body>
+    <!-- you can find latest pretty easy from chartjs.org too
+    https://www.jsdelivr.com/package/npm/chart.js?path=dist
+    -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.4.1/dist/chart.min.js"></script>
+    <!-- color parser used in the examples. 
+     Thx @etimberg for adding this required include
+     https://www.npmjs.com/package/@kurkle/color/ -->
+    <script src="https://cdn.jsdelivr.net/npm/@kurkle/color@0.1.9/dist/color.min.js"></script>
+    <main class="mainclass">
+      
+      <!-- in docs (not samples), style attr added/req'd -->
+      <canvas 
+        id="myChart" 
+        height="500" 
+        style="height: 100%; width: 100%;"
+      ></canvas>
+    </main>
+  </body>
+<script
+    src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
+  <script>
+    // added for obvi reasons... I would default to dark for same reasons
+        const darkMode = false; // an option for mornings I guess?
+
+        // source: https://www.chartjs.org/docs/latest/samples/bar/vertical.html
+       
+
+        // source: https://www.chartjs.org/docs/master/samples/utils.html
+        // thanks @LeeLenaleee & @etimberg! 
+        const CHART_COLORS = {
+            red: "rgb(255, 99, 132)",
+            orange: "rgb(255, 159, 64)",
+            yellow: "rgb(255, 205, 86)",
+            green: "rgb(75, 192, 192)",
+            blue: "rgb(54, 162, 235)",
+            purple: "rgb(153, 102, 255)",
+            grey: "rgb(101, 103, 107)",
+            //asl colors
+            burgendy: "#861F41",
+            greys: "#595959",
+        };
+        const NAMED_COLORS = [
+            CHART_COLORS.red,
+            CHART_COLORS.orange,
+            CHART_COLORS.yellow,
+            CHART_COLORS.green,
+            CHART_COLORS.blue,
+            CHART_COLORS.purple,
+            CHART_COLORS.grey,
+            //asl colors
+            CHART_COLORS.burgendy,
+            CHART_COLORS.greys,
+        ];
+        const valueOrDefault = (value, defaultValue) => {
+            return typeof value === "undefined" ? defaultValue : value;
+        }
+        var _seed = Date.now();
+        const Utils = {
+            MONTHS: [
+                "1 Month",
+                "3 Month",
+                "6 Month",
+                "1 Year",
+                "2 Year",
+                "3 Year",
+                "5 Year",
+                "Since Inception",
+            ],
+            months(config) {
+                var cfg = config || {};
+                var count = cfg.count || 12;
+                var section = cfg.section;
+                var values = [];
+                var i, value;
+
+                for (i = 0; i < count; ++i) {
+                    value = this.MONTHS[Math.ceil(i) % 12];
+                    values.push(value.substring(0, section));
+                }
+
+                return values;
+            },
+            "CHART_COLORS": CHART_COLORS,
+            "NAMED_COLORS": NAMED_COLORS,
+            numbers(config) {
+                var cfg = config || {};
+                var min = valueOrDefault(cfg.min, 0);
+                var max = valueOrDefault(cfg.max, 100);
+                var from = valueOrDefault(cfg.from, []);
+                var count = valueOrDefault(cfg.count, 8);
+                var decimals = valueOrDefault(cfg.decimals, 2);
+                var continuity = valueOrDefault(cfg.continuity, 1);
+                var dfactor = Math.pow(10, decimals) || 0;
+                var data = [];
+                var i, value;
+
+                for (i = 0; i < count; ++i) {
+                    value = (from[i] || 0) + this.rand(min, max);
+                    if (this.rand() <= continuity) {
+                        data.push(Math.round(dfactor * value) / dfactor);
+                    } else {
+                        data.push(null);
+                    }
+                }
+
+                return data;
+            },
+            rand(min, max) {
+                min = valueOrDefault(min, 0);
+                max = valueOrDefault(max, 0);
+                _seed = (_seed * 9301 + 49297) % 233280;
+                return min + (_seed / 233280) * (max - min);
+            },
+            transparentize(value, opacity) {
+                var alpha = opacity === undefined ? 0.5 : 1 - opacity;
+                return window["@kurkle/color"](value).alpha(alpha).rgbString();
+            },
+            namedColor: (index) => NAMED_COLORS[index % NAMED_COLORS.length],
+        };
+
+        // source: https://www.chartjs.org/docs/latest/samples/bar/vertical.html
+        
+        const TODAYDATE = new Date().toLocaleString('en-us', { day: 'numeric', month: 'short', year: 'numeric' });
+        const DATA_COUNT = 8;
+        const NUMBER_CFG = { count: DATA_COUNT, min: -15, max: 15 };
+        const labels = Utils.months({ count: DATA_COUNT });
+        const data = {
+            color: "#c0d0e0", // added for dark mode
+            labels,
+            datasets: [
+                {
+                    label: "Strategy",
+                    // data: Utils.numbers(NUMBER_CFG),
+                    data: ['2.20', '-1.83', '3.01', '4.37', '5.68', '-2.48', '5.70', '6.58'],
+                    color: darkMode ? "#c0d0e0" : undefined, // dark mode
+                    borderColor: "#861F41",
+                    backgroundColor: "#861F41",
+                },
+                {
+                    label: "Benchmark",
+                    // data: Utils.numbers(NUMBER_CFG),
+                    data: ['1.20', '-2.53', '2.01', '3.37', '4.68', '-3.48', '4.70', '4.58'],
+                    color: darkMode ? "#c0d0e0" : undefined, // dark mode
+                    borderColor: "#595959",
+                    backgroundColor: "#595959",
+                }
+            ]
+        };
+
+        let config = {
+            type: "bar" || "line", // other types need config adjustments
+            data,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: darkMode ? "#c0d0e0" : undefined,
+                        },
+                        position: "top",
+                        align :"end",
+                    },
+                    title: {
+                        display: true,
+                        text: "Chart.js Bar Chart",
+                        color: darkMode ? "#c0d0e0" : undefined,
+                        position: "end",
+                        display: false
+                    },
+                    datalabels: { // This code is used to display data values
+                        anchor: 'end',
+                        align: 'top',
+                        // formatter: Math.round,
+                        font: {
+                            weight: 'bold',
+                            size: 12
+                        }
+                    }
+                },
+                scales: { // added for dark mode
+                    y: {
+                        ticks: { color: darkMode ? "#c0d0e0" : undefined },
+                        grid: {
+                            // source: https://www.chartjs.org/docs/master/samples/scale-options/grid.html
+                            color: (context) => {
+                                if (context.tick.value > 0) {
+                                    return Utils.transparentize(Utils.CHART_COLORS.green, 0.5);
+                                } else if (context.tick.value < 0) {
+                                    return Utils.transparentize(Utils.CHART_COLORS.red, 0.5);
+                                }
+                                return '#c0d0e0';
+                            },
+                        },
+                    },
+                    x: {
+                        ticks: { color: darkMode ? "#c0d0e0" : undefined },
+                        grid: { color: "#aaa" },
+                    },
+                    x2: {
+                        labels: ['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', TODAYDATE, ],
+                        drawOnChartArea: false,
+                        ticks: {
+                           font: {
+                            weight: "bold",
+                           }
+                        }
+                    },
+                },
+            }
+        };
+        // added for dark mode
+        const body = document.querySelector("body");
+        if (darkMode) {
+            config.options.scales = { // added for dark mode
+                y: {
+                    ticks: { color: "#c0d0e0" },
+                    grid: {
+                        // source: https://www.chartjs.org/docs/master/samples/scale-options/grid.html
+                        color: function (context) {
+                            if (context.tick.value > 0) {
+                                return Utils.transparentize(Utils.CHART_COLORS.green, 0.5);
+                            } else if (context.tick.value < 0) {
+                                return Utils.transparentize(Utils.CHART_COLORS.red, 0.5);
+                            }
+                            return '#c0d0e0';
+                        },
+                    },
+                },
+                x: {
+                    ticks: { color: "#c0d0e0" },
+                    grid: { color: "#909090" },
+                },
+            };
+            body.className = "dark";
+        }
+        // source: other docs, not the samples
+        Chart.register(ChartDataLabels);
+        const ctx = document.getElementById("myChart");
+        let myChart = new Chart(ctx, config);
+  </script>
+</html>

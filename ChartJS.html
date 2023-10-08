@@ -1,0 +1,211 @@
+<!-- no html is in the current samples, just json objects -->
+<html>
+  <head>
+    <title>
+      Chart.JS - Bar/Line Chart - Full Example w Buttons from "actions" array in samples
+    </title>
+  </head>
+  <style>
+    /***
+ * codepen user notes: 
+ * Try "change view" -> "/full/" or ...
+ *   change canvas height attr to "350" in "/pen/"
+ * Any code edits will refresh & clear random data
+***/
+
+/* scraped from the Chart.js examples website */
+button {
+    transition: background .25s, border-color .25s;
+    background: rgba(40,44,52,.05);
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: #2f5fd0;
+    text-decoration: none !important;
+    display: inline-block;
+    font-size: .8rem;
+    padding: 8px 16px;
+    margin: 0 8px 8px 0;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}
+/* added for dark mode */
+body, body a {
+  font-family: Helvetica, Arial, sans-serif;
+}
+body.dark, body.dark a {
+  background: #02050a;
+  color: #c0d0e0;
+}
+body.dark button {
+  background: rgba(40,44,52,.75);
+  color: #3f7fd0;
+}
+button:hover {
+  background: rgba(40,44,52,.5);
+}
+body.dark button:hover {
+  background: #c0d0e0;
+  color: rgba(40,44,52,1);
+}
+.mainclass {
+    height: 50%;
+    width: 60%;
+}
+  </style>
+  <body>
+    <!-- you can find latest pretty easy from chartjs.org too
+    https://www.jsdelivr.com/package/npm/chart.js?path=dist
+    -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.4.1/dist/chart.min.js"></script>
+    <!-- color parser used in the examples. 
+     Thx @etimberg for adding this required include
+     https://www.npmjs.com/package/@kurkle/color/ -->
+    <script src="https://cdn.jsdelivr.net/npm/@kurkle/color@0.1.9/dist/color.min.js"></script>
+    <main class="mainclass">
+      
+      <!-- in docs (not samples), style attr added/req'd -->
+      <canvas 
+        id="myChart" 
+        height="500" 
+        style="height: 100%; width: 100%;"
+      ></canvas>
+    </main>
+  </body>
+<script
+    src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
+  <script>
+
+        // source: https://www.chartjs.org/docs/latest/samples/bar/vertical.html
+        // source: https://www.chartjs.org/docs/master/samples/utils.html
+        const CHART_COLORS = {
+            burgendy: "#861F41",
+            grey: "#595959",
+        };
+        const NAMED_COLORS = [
+            CHART_COLORS.burgendy,
+            CHART_COLORS.grey,
+        ];
+        const valueOrDefault = (value, defaultValue) => {
+            return typeof value === "undefined" ? defaultValue : value;
+        }
+        var _seed = Date.now();
+        const Utils = {
+            MONTHS: [
+                "1 Month",
+                "3 Month",
+                "6 Month",
+                "1 Year",
+                "2 Year",
+                "3 Year",
+                "5 Year",
+                "Since Inception",
+            ],
+            months(config) {
+                var cfg = config || {};
+                var count = cfg.count || 12;
+                var section = cfg.section;
+                var values = [];
+                var i, value;
+
+                for (i = 0; i < count; ++i) {
+                    value = this.MONTHS[Math.ceil(i) % 12];
+                    values.push(value.substring(0, section));
+                }
+
+                return values;
+            },
+            "CHART_COLORS": CHART_COLORS,
+            "NAMED_COLORS": NAMED_COLORS,
+            numbers(config) {
+                var cfg = config || {};
+                var min = valueOrDefault(cfg.min, 0);
+                var max = valueOrDefault(cfg.max, 100);
+                var from = valueOrDefault(cfg.from, []);
+                var count = valueOrDefault(cfg.count, 8);
+                var decimals = valueOrDefault(cfg.decimals, 2);
+                var continuity = valueOrDefault(cfg.continuity, 1);
+                var dfactor = Math.pow(10, decimals) || 0;
+                var data = [];
+                var i, value;
+
+                return data;
+            },
+        };
+
+        // source: https://www.chartjs.org/docs/latest/samples/bar/vertical.html
+        
+        const TODAYDATE = new Date().toLocaleString('en-us', { day: 'numeric', month: 'long', year: 'numeric' });
+        const DATA_COUNT = 8;
+        const NUMBER_CFG = { count: DATA_COUNT, min: -15, max: 15 };
+        const labels = Utils.months({ count: DATA_COUNT });
+        const data = {
+            labels,
+            datasets: [
+                {
+                    label: "Strategy",
+                    data: ['2.20', '-1.83', '3.01', '4.37', '5.68', '-2.48', '5.70', '6.58'],
+                    borderColor: "#861F41",
+                    backgroundColor: "#861F41",
+                },
+                {
+                    label: "Benchmark",
+                    data: ['1.20', '-2.53', '2.01', '3.37', '4.68', '-3.48', '4.70', '4.58'],
+                    borderColor: "#595959",
+                    backgroundColor: "#595959",
+                }
+            ]
+        };
+
+        let config = {
+            type: "bar" || "line", // other types need config adjustments
+            data,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: "top",
+                        align :"end",
+                    },
+                    title: {
+                        display: true,
+                        text: "Chart.js Bar Chart",
+                        position: "end",
+                        display: false
+                    },
+                    datalabels: { 
+                        anchor: 'end',
+                        align: 'top',
+                        font: {
+                            weight: 'bold',
+                            size: 12
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: { color: "#000000"},
+                    },
+                    x: {
+                        ticks: { color: "#000000"},
+                    },
+                    x2: {
+                        labels: ['March', 'April', 'May', 'June', 'July', 'August', 'September', TODAYDATE, ],
+                        drawOnChartArea: false,
+                        ticks: {
+                            color: "#000000",
+                           font: {
+                            weight: "bold",
+                           }
+                        }
+                    },
+                },
+            }
+        };
+
+        Chart.register(ChartDataLabels);
+        const ctx = document.getElementById("myChart");
+        let myChart = new Chart(ctx, config);
+  </script>
+</html>
